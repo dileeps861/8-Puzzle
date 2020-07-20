@@ -106,7 +106,7 @@ public class Solver {
     // test client (see below)
     public static void main(String[] args) {
        // create initial board from file
-        In in = new In(arg[0]);
+        In in = new In(args[0]);
         int n = in.readInt();
         int[][] tiles = new int[n][n];
         for (int i = 0; i < n; i++)
