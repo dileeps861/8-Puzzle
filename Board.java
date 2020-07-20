@@ -2,17 +2,16 @@ import edu.princeton.cs.algs4.Stack;
 import edu.princeton.cs.algs4.StdOut;
 
 public class Board {
-    // private final int n;
     private final int[][] tArr;
 
     // create a board from an n-by-n array of tArr,
     // where tArr[row][col] = tile at (row, col)
     public Board(int[][] tiles) {
         if (tiles == null) throw new IllegalArgumentException("Arguments cannot be null");
-        // n = tiles.length;
         this.tArr = copyArr(tiles);
     }
-
+    
+    // Need this method as .clone() method is not creating the copy of the 2D array
     private int[][] copyArr(int[][] arg) {
         int[][] newTiles = new int[arg.length][arg[0].length];
         for (int i = 0; i < arg.length; i++) {
@@ -39,10 +38,9 @@ public class Board {
         return this.tArr.length;
     }
 
-    // number of tArr out of place
+    // number of tiles out of place
     public int hamming() {
         int count = 0;
-        //int[][] newTiles = tArr.clone();
         for (int i = 0; i < tArr.length; i++) {
             for (int j = 0; j < tArr[i].length; j++) {
                 if (tArr[i][j] != 0 && tArr[i][j] != (i * this.tArr.length + j + 1)) count++;
@@ -51,10 +49,9 @@ public class Board {
         return count;
     }
 
-    // sum of Manhattan distances between tArr and goal
+    // sum of Manhattan distances between tiles and goal
     public int manhattan() {
         int sum = 0;
-        //int[][] newTiles = tArr.clone();
         for (int i = 0; i < tArr.length; i++) {
             for (int j = 0; j < tArr[i].length; j++) {
                 if (tArr[i][j] != 0 && tArr[i][j] != (i * this.tArr.length + j + 1)) {
@@ -159,14 +156,10 @@ public class Board {
 
         if (tArr[0][0] == 0 || tArr[0][1] == 0) {
             Board nB = new Board(swap(new int[] { 1, 1 }, new int[] { 0, 1 }));
-            // StdOut.println("nb=" + nB.toString());
-            // StdOut.println("this=" + this.toString());
             return nB;
         }
         else {
             Board nB = new Board(swap(new int[] { 0, 0 }, new int[] { 0, 1 }));
-            // StdOut.println("nb=" + nB.toString());
-            // StdOut.println("this=" + this.toString());
             return nB;
         }
     }
