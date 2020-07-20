@@ -1,6 +1,7 @@
 import edu.princeton.cs.algs4.MinPQ;
 import edu.princeton.cs.algs4.Stack;
 import edu.princeton.cs.algs4.StdOut;
+import edu.princeton.cs.algs4.In;
 
 public class Solver {
 
@@ -11,36 +12,37 @@ public class Solver {
     // find a solution to the initial board (using the A* algorithm)
     public Solver(Board initial) {
         if (initial == null) throw new IllegalArgumentException("Argument cannot be null");
-
         solutions = new Stack<>();
-        MinPQ<SearchNode> pq;
-        pq = new MinPQ<>();
-
         isSol = false;
-        if (initial.hamming() == 0) {
+        aStarSearch(initial);
+    }
+    
+    private void aStarSearch(Board initial){
+        MinPQ<SearchNode> pq = new MinPQ<>();       // MinPQ to create neighbour tree
+        if (initial.hamming() == 0) {       // To avoid unnecessary calculation if it bord is already solved
             isSol = true;
             solutions.push(initial);
         }
         else {
             Board twinBoard = initial.twin();
-            pq.insert(new SearchNode(null, initial));
-            pq.insert(new SearchNode(null, twinBoard));
+            pq.insert(new SearchNode(null, initial));       
+            pq.insert(new SearchNode(null, twinBoard));     // Twin is needed in case of no solution, below while loop can be terminated if
+                                                            //  if Twin's solution is found
 
             while (!pq.min().board.isGoal()) {
 
                 SearchNode minNode = pq.delMin();
-
                 for (Board board : minNode.board.neighbors()) {
                     if (minNode.prev == null)
                         pq.insert(new SearchNode(minNode, board));
                     else if (!minNode.prev.board.equals(board)) {
-                        // StdOut.println("min= " + minNode.board.toString());
-                        // StdOut.println("b= " + board.toString());
-                        pq.insert(new SearchNode(minNode, board));
+                        pq.insert(new SearchNode(minNode, board));  // Add the node to pq if the node is not already explored 
                     }
                 }
             }
             SearchNode goalNode = pq.delMin();
+            
+            // Below loop will populate the solution queue if solution is found
             while (goalNode.prev != null) {
                 solutions.push(goalNode.board);
                 goalNode = goalNode.prev;
@@ -50,9 +52,10 @@ public class Solver {
                 isSol = true;
             }
         }
+    
+    
     }
-
-    private class SearchNode implements Comparable<SearchNode> {
+    private class SearchNode implements Comparable<SearchNode> {    // Search node for comparison 
         private SearchNode prev;
         private Board board;
         private int movesIn;
@@ -74,8 +77,6 @@ public class Solver {
         public int compareTo(SearchNode that) {
 
             if (this.manhattan + this.movesIn == that.manhattan + that.movesIn) {
-                // StdOut.println("manhattan1= " + that.movesIn);
-                // StdOut.println("manhattan2= " + this.movesIn);
                 return this.manhattan - that.manhattan;
             }
             else {
@@ -87,7 +88,6 @@ public class Solver {
 
     // is the initial board solvable? (see below)
     public boolean isSolvable() {
-        // StdOut.println("is:=" + isSol);
         return isSol;
     }
 
@@ -105,20 +105,27 @@ public class Solver {
 
     // test client (see below)
     public static void main(String[] args) {
-        int[][] t = new int[3][3];
-        int c = 1;
-        for (int i = 0; i < 3; i++) {
-            for (int j = 0; j < 3; j++) {
-                t[i][j] = c;
-                c++;
-            }
-        }
-        t[1][2] = 0;
-        t[2][2] = 6;
+       // create initial board from file
+        In in = new In(arg[0]);
+        int n = in.readInt();
+        int[][] tiles = new int[n][n];
+        for (int i = 0; i < n; i++)
+            for (int j = 0; j < n; j++)
+                tiles[i][j] = in.readInt();
+        Board initial = new Board(tiles);
+        StdOut.println(initial.toString());
 
-        Board b = new Board(t);
-        Solver sl = new Solver(b);
-        StdOut.println(sl.isSolvable());
-        StdOut.println("Manhattan=" + b.manhattan());
+
+        //solve the puzzle
+        Solver solver = new Solver(initial);
+
+        //print solution to standard output
+        if (!solver.isSolvable())
+            StdOut.println("No solution possible");
+        else {
+            StdOut.println("Minimum number of moves = " + solver.moves());
+            for (Board board : solver.solution())
+                StdOut.println(board);
+        }
     }
 }
